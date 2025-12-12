@@ -30,6 +30,20 @@ export function appendObjects<T extends Record<string, any>>(
         .setValues(values);
 }
 
+export function appendRows(
+    configKey: keyof typeof SHEETS,
+    rows: any[][]
+) {
+    const sheet = getOrCreateSheet(configKey);
+    if (rows.length === 0) return;
+
+    // Ensure we don't write more columns than headers exist (or let Sheet expand?)
+    // For safety, we should probably respect the config column count, but for now let's write what we have.
+    // SheetMapper should ensure correct length.
+    sheet.getRange(sheet.getLastRow() + 1, 1, rows.length, rows[0].length)
+        .setValues(rows);
+}
+
 // Example: Mandates Writer
 import type { MandateRow, TaskRow } from "./reader";
 
@@ -39,4 +53,8 @@ export function writeMandates(rows: MandateRow[]): void {
 
 export function writeTasks(rows: TaskRow[]): void {
     appendObjects("tasks", rows);
+}
+
+export function writePeople(rows: any[][]): void {
+    appendRows("people", rows);
 }
